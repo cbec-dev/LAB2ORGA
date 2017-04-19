@@ -1,0 +1,4 @@
+OBSERVACIONES:
+
+Procesador con forwarding
+Branch taken
