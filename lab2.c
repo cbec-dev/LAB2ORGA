@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h> // For exit() function
 
-// Variables globales (Registros)
+// Variables globales (Registros)		En el main se actualizarán con los valores del archivo de entrada de Registros.
 
 
 int at = 0;
@@ -706,44 +706,57 @@ void showProgram()
 int main()
 {
     char c[1000];			//Variable auxiliar
-    FILE *fptr;				//puntero al archivo de entrada	
-	char inputFile[30];		//nombre archivo de entrada	
+    FILE *fptr1;				//puntero al primer archivo de entrada	(codigo)
+	FILE *fptr2;				//puntero al primer archivo de entrada	(registros)
+	char inputFile1[30];		//nombre archivo de entrada	1 (codigo)
+	char inputFile2[30];		//nombre archivo de entrada	2 (registros)
 	char outputFile1[30];	//nombre archivo de salida 1
 	char outputFile2[30];	//nombre archivo de salida 2
 	
-	printf("Bienvenido, por favor ingrese el nombre de su archivo de entrada (incluyendo extensión):\n"); // PANTALLA DE BIENVENIDA E INGRESO DE ARCHIVO DE ENTRADA
-	scanf("%s", inputFile);
+	printf("Bienvenido, por favor ingrese el nombre del archivo de entrada correspondiente al programa MIPs (incluyendo extensión):\n"); // PANTALLA DE BIENVENIDA E INGRESO DE ARCHIVO DE ENTRADA
+	scanf("%s", inputFile1);
 	
-	while ((fptr = fopen(inputFile, "r")) == NULL)														 // CAPTURA DE ERRORES EN CASO DE NOMBRES DE ARCHIVO CONFLICTIVOS ENTRE SI O INEXISTENTES.
+	while ((fptr1 = fopen(inputFile1, "r")) == NULL)														 // CAPTURA DE ERRORES EN CASO DE NOMBRES DE ARCHIVO CONFLICTIVOS ENTRE SI O INEXISTENTES.
     {
         printf("ERROR: El archivo no existe, por favor ingrese otro archivo:\n");
-		scanf("%s", inputFile);
+		scanf("%s", inputFile1);
     }
+	
+	printf("Bienvenido, por favor ingrese el nombre del archivo de entrada correspondiente a los registros (incluyendo extensión):\n"); 
+	scanf("%s", inputFile2);
+	
+	while ((fptr1 = fopen(inputFile2, "r")) == NULL || (strcmp(inputFile2,inputFile1) == 0))
+    {
+        printf("ERROR: El archivo no existe o tiene el mismo nombre que el archivo de entrada 1, por favor ingrese otro archivo:\n");
+		scanf("%s", inputFile2);
+    }
+
+	
 	
 	printf("Ahora ingrese el nombre del archivo de salida 1 (incluyendo extensión):\n");
 	scanf("%s", outputFile1);
 	
-	while (strcmp(outputFile1,inputFile) == 0)
+	while ((strcmp(outputFile1,inputFile1) == 0) || (strcmp(outputFile1,inputFile2) == 0))
     {
-        printf("ERROR: Por favor ingrese un nombre distinto al del archivo de entrada:\n");
+        printf("ERROR: Por favor ingrese un nombre distinto al de los archivos de entrada:\n");
 		scanf("%s", outputFile1);
     }
 	
 	printf("Ahora ingrese el nombre del archivo de salida 2 (incluyendo extensión):\n");
 	scanf("%s", outputFile2);
 	
-		while ((strcmp(outputFile2,inputFile) == 0) || (strcmp(outputFile2,outputFile1) == 0))
+		while ((strcmp(outputFile2,inputFile1) == 0) || (strcmp(outputFile2,inputFile2) == 0) || (strcmp(outputFile2,outputFile1) == 0))
     {
-        printf("ERROR: Por favor ingrese un nombre distinto al del archivo de entrada y el archivo de salida 1:\n");
+        printf("ERROR: Por favor ingrese un nombre distinto al de los archivos de entrada y el archivo de salida 1:\n");
 		scanf("%s", outputFile2);
     }
 	
 	
 	int pcAux=0;	// Entero auxiliar para llenar los valores del PC en cada instruccion
 	
-	while(!feof(fptr))				//Se lee el archivo de entrada y se guarda linea por linea en la lista
+	while(!feof(fptr1))				//Se lee el archivo de entrada y se guarda linea por linea en la lista
 	{
-		fgets(c, 200, fptr);
+		fgets(c, 200, fptr1);
 		if (strcmp(c,"\n")!=0)
 		{
 			add(c, pcAux);
@@ -751,7 +764,7 @@ int main()
 		}
 	}
 	
-	fclose(fptr);				//Se cierra archivo de entrada
+	fclose(fptr1);				//Se cierra archivo de entrada
 	
 
 	separateRegisters();				//Se separan los elementos de las instrucciones en la lista (por tokens).
