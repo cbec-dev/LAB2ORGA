@@ -33,7 +33,8 @@ int t9 = 0;
 int k0 = 0;
 int k1 = 0;
 int gp = 0;
-int sp[20];
+int sp = 0;
+int stack[100];
 int fp = 0;
 int ra = 0;
 int zero = 0;
@@ -136,7 +137,7 @@ void updateReg(char *r, int value)			//funcion que actualiza un registro con el 
 	if(strstr(r,"k0")!=NULL) k0=value;
 	if(strstr(r,"k1")!=NULL) k1=value;
 	if(strstr(r,"gp")!=NULL) gp=value;
-//	if(strstr(r,"sp")!=NULL) sp=value;			//sp se modifica con addToSP
+	if(strstr(r,"sp")!=NULL) sp=value;
 	if(strstr(r,"fp")!=NULL) fp=value;
 	if(strstr(r,"ra")!=NULL) ra=value;
 	
@@ -173,7 +174,7 @@ int getRegValue(char *r)			//funcion que retorna el valor que guarda cierto regi
 	if(strstr(r,"k0")!=NULL) return k0;
 	if(strstr(r,"k1")!=NULL) return k1;
 	if(strstr(r,"gp")!=NULL) return gp;
-//	if(strstr(r,"sp")!=NULL) return sp;		//sp se retorna con getFromSP
+	if(strstr(r,"sp")!=NULL) return sp;		
 	if(strstr(r,"fp")!=NULL) return fp;
 	if(strstr(r,"ra")!=NULL) return ra;
 	return atoi(r);
@@ -213,7 +214,7 @@ void fixInstructionsLength(int length)				//Dejamos todas las instrucciones con 
 void printRegisters (FILE *fp1)			//Funcion para imprimir todos los registros cuando sea necesario.
 {
 	fprintf(fp1, "\t");
-	fprintf(fp1, "%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",at,v0,v1,a0,a1,a2,a3,t0,t1,t2,t3,t4,t5,t6,t7,s0,s1,s2,s3,s4,s5,s6,s7,t8,t9,k0,k1,gp,sp[0],fp,ra,zero);
+	fprintf(fp1, "%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i",at,v0,v1,a0,a1,a2,a3,t0,t1,t2,t3,t4,t5,t6,t7,s0,s1,s2,s3,s4,s5,s6,s7,t8,t9,k0,k1,gp,sp,fp,ra,zero);
 }
 
 void idInstruction(struct _instruction *in)
@@ -342,16 +343,35 @@ int searchPCByLabel(char *label)			//Funcion que busca el PC correspondiente a l
 
 void addToSP(int value, char *r)			//Funcion que agrega un valor al array del registro sp
 {
+	char* rAux;
+	rAux = (char *) malloc (sizeof(r));
+	printf("AQUI");
+	strcpy(rAux,r);
+	printf("AQUI");
 	char *token;
-	token = strtok(r, "(");
-	sp[(atoi(token)/4)]=value;
+	token = strtok(rAux, "(");
+	stack[((sp+atoi(token))/4)*(-1)]=value;
+	printf("ADD TO SP: %i - %i\n", ((sp+atoi(token))/4)*(-1), value);
 }
 
 int getFromSP(char *r)			//Funcion que agrega un valor al array del registro sp
 {
+	char* rAux;
+	rAux = (char *) malloc (sizeof(r));
+	strcpy(rAux,r);
 	char *token;
-	token = strtok(r, "(");
-	return sp[(atoi(token)/4)];
+	token = strtok(rAux, "(");
+	return stack[((sp+atoi(token))/4)*(-1)];
+}
+
+void printSP()
+{
+	int i=0;
+	while(i<100)
+	{
+		printf("%i - %i\n", i, stack[i]);
+		i++;
+	}
 }
 
 
@@ -613,9 +633,12 @@ void trazaFull(FILE *fp1, FILE *fp2) 						// Imprime los archivos de salida
 				if (strcmp(aux->op, "sw")==0)
 				{
 					//sw
+					printf("\n.SW DETECTADO: %s %s %s.\n",aux->op,aux->r1,aux->r2);
 					if(strstr(aux->r2,"sp")!=NULL)					//si queremos guardar en sp
 					{
+						printf("\n.ADD TO SP DETECTADO: %s %s %s.\n",aux->op,aux->r1,aux->r2);
 						addToSP(getRegValue(aux->r1),aux->r2);		//guardamos en sp
+						printf("\n.ADD TO SP DETECTADO2: %s %s %s.\n",aux->op,aux->r1,aux->r2);
 					}
 					else											//si queremos guardar en otro registro
 					{
@@ -676,7 +699,7 @@ void trazaFull(FILE *fp1, FILE *fp2) 						// Imprime los archivos de salida
  
  
  
-// TESTING 
+
  
 void separateRegisters() 
 {
@@ -689,6 +712,8 @@ void separateRegisters()
 		i++;
 	}
 }
+
+// TESTING 
 
 void showProgram() 
 {
@@ -781,12 +806,6 @@ int main()
 		printf(".%s = ", token);
 		token = strtok(NULL, "\n");
 		printf("%s.\n", token);
-		//printf(".%s = %s.\n", strtok(c2, " "), strtok(c2, "\n"));
-		
-/* 		if (strcmp(c2,"\n")!=0)
-		{
-			printf(".%s.\n", c2);
-		} */
 	}
 
 	
@@ -808,5 +827,7 @@ int main()
 	fclose(fp1);						//Se cierran los archivos
 	fclose(fp2);
 
+	
+	printSP();
     return 0;
 }
