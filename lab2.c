@@ -5,39 +5,39 @@
 // Variables globales (Registros)		En el main se actualizarán con los valores del archivo de entrada de Registros.
 
 
-int at = 0;
-int v0 = 0;
-int v1 = 0;
-int a0 = 0;
-int a1 = 0;
-int a2 = 0;
-int a3 = 0;
-int t0 = 0;
-int t1 = 0;
-int t2 = 0;
-int t3 = 0;
-int t4 = 0;
-int t5 = 0;
-int t6 = 0;
-int t7 = 0;
-int s0 = 0;
-int s1 = 0;
-int s2 = 0;
-int s3 = 0;
-int s4 = 0;
-int s5 = 0;
-int s6 = 0;
-int s7 = 0;
-int t8 = 0;
-int t9 = 0;
-int k0 = 0;
-int k1 = 0;
-int gp = 0;
-int sp = 0;
-int stack[100];
-int fp = 0;
-int ra = 0;
-int zero = 0;
+long at = 0;
+long v0 = 0;
+long v1 = 0;
+long a0 = 0;
+long a1 = 0;
+long a2 = 0;
+long a3 = 0;
+long t0 = 0;
+long t1 = 0;
+long t2 = 0;
+long t3 = 0;
+long t4 = 0;
+long t5 = 0;
+long t6 = 0;
+long t7 = 0;
+long s0 = 0;
+long s1 = 0;
+long s2 = 0;
+long s3 = 0;
+long s4 = 0;
+long s5 = 0;
+long s6 = 0;
+long s7 = 0;
+long t8 = 0;
+long t9 = 0;
+long k0 = 0;
+long k1 = 0;
+long gp = 0;
+long sp = 0;
+long stack[100];
+long fp = 0;
+long ra = 0;
+long zero = 0;
 
 
 
@@ -45,18 +45,77 @@ int zero = 0;
 
 
 struct _instruction {					// Se guardarán las instrucciones del archivo de entrada en una lista.
-        char ins[50];
-		int pc;
-		char op[30];
-		char r1[20];
-		char r2[20];
-		char r3[20];
+    char ins[50];
+	int pc;
+	char op[30];
+	char r1[20];
+	char r2[20];
+	char r3[20];
+	
+    struct _instruction *next;
+    };
 		
-        struct _instruction *next;
-        };
+struct _bufferIFID {					
+	long Add_PC;
+	char ins[40];
+    };
+		
+struct _bufferIDEX {
+	long Add_PC;
+	int ALUSrc;
+	int ALUOP;
+	int RegDst;
+	int Branch;
+	int MemWrite;
+	int MemRead;
+	int RegWrite;
+	int MemToReg;
+	long Read_data_1;
+	long Read_data_2;
+	long Sign_extend;
+	char Rs[10];
+	char Rt[10];
+	char Rd[10];
+	};
 
- struct _instruction *first, *last;		// Punteros hacía el primer y último elemento de la lista (primera y última instrucción del archivo de entrada en este caso).
- 
+struct _bufferEXMEM {					
+	int Branch;
+	int MemWrite;
+	int MemRead;
+	int RegWrite;
+	int MemToReg;
+	int Zero;
+	long ALU_Result;
+	long Read_data_2;
+	long Add_result;
+	char Mux_RegDst[10];
+    };
+		
+struct _bufferMEMWB {					
+	int RegWrite;
+	int MemToReg;
+	long Read_data;
+	long ALU_Result;
+	char Mux_RegDst[10];	
+		
+    };
+
+
+struct _instruction *first, *last;		// Punteros hacía el primer y último elemento de la lista (primera y última instrucción del archivo de entrada en este caso).
+struct _bufferIFID *IFID;				//Buffers
+struct _bufferIDEX *IDEX;		
+struct _bufferEXMEM *EXMEM;		
+struct _bufferMEMWB *MEMWB;
+
+
+
+
+
+
+
+
+
+
  
 void add(char in[50], int pc) {
 	
@@ -374,13 +433,232 @@ void printSP()
 	}
 }
 
+void flush(struct _bufferIFID *IFID, struct _bufferIDEX *IDEX, struct _bufferEXMEM *EXMEM, struct _bufferMEMWB *MEMWB)
+{
+	IFID->Add_PC=0;				//Flush de IFID
+	strcpy(IFID->ins,"");
+
+	IDEX->Add_PC=0;				//Flush de IDEX
+	IDEX->ALUSrc=0;
+	IDEX->ALUOP=0;
+	IDEX->RegDst=0;
+	IDEX->Branch=0;
+	IDEX->MemWrite=0;
+	IDEX->MemRead=0;
+	IDEX->RegWrite=0;
+	IDEX->MemToReg=0;
+	IDEX->Read_data_1=0;
+	IDEX->Read_data_2=0;
+	IDEX->Sign_extend=0;
+	strcpy(IDEX->Rs,"");
+	strcpy(IDEX->Rt,"");
+	strcpy(IDEX->Rd,"");
+
+	EXMEM->Branch=0;			//Flush de EXMEM
+	EXMEM->MemWrite=0;
+	EXMEM->MemRead=0;
+	EXMEM->RegWrite=0;
+	EXMEM->MemToReg=0;
+	EXMEM->Zero=0;
+	EXMEM->ALU_Result=0;
+	EXMEM->Read_data_2=0;
+	EXMEM->Add_result=0;
+	strcpy(EXMEM->Mux_RegDst,"");
+
+	MEMWB->RegWrite=0;			//Flush de MEMWB
+	MEMWB->MemToReg=0;
+	MEMWB->Read_data=0;
+	MEMWB->ALU_Result=0;
+	strcpy(MEMWB->Mux_RegDst,"");
+}
+
+void printBuffers(FILE *fp2)
+{
+	fprintf(fp2, "\t\t\t");
+	printf("HOLA");
+	fprintf(fp2, "Add_PC: %ld", IFID->Add_PC);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Add_PC: %i", IDEX->Add_PC);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Branch: %i", EXMEM->Branch);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "RegWrite: %i", MEMWB->RegWrite);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t");
+	fprintf(fp2, "Ins: %s", IFID->ins);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "ALUSrc: %i", IDEX->ALUSrc);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "MemWrite: %i", EXMEM->MemWrite);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "MemToReg: %i", MEMWB->MemToReg);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "ALUOP: %i", IDEX->ALUOP);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "MemRead: %i", EXMEM->MemRead);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Read_data: %i", MEMWB->Read_data);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "RegDst: %i", IDEX->RegDst);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "RegWrite: %i", EXMEM->RegWrite);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "ALU_Result: %i", MEMWB->ALU_Result);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Branch: %i", IDEX->Branch);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "MemToReg: %i", EXMEM->MemToReg);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Mux_RegDst: %s", MEMWB->Mux_RegDst);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Memwrite: %i", IDEX->MemWrite);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Zero: %i", EXMEM->Zero);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "MemRead: %i", IDEX->MemRead);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "ALU_Result: %ld", EXMEM->ALU_Result);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "RegWrite: %i", IDEX->RegWrite);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Read_data_2: %i", EXMEM->Read_data_2);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "MemToReg: %i", IDEX->MemToReg);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Add_result: %i", EXMEM->Add_result);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Read_data_1: %i", IDEX->Read_data_1);
+	fprintf(fp2, "\t");
+	fprintf(fp2, "Mux_RegDst: %s", EXMEM->Mux_RegDst);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Read_data_2: %i", IDEX->Read_data_2);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Sign_extend: %i", IDEX->Sign_extend);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Rs: %s", IDEX->Rs);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Rt: %s", IDEX->Rt);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "\t\t\t\t\t\t");
+	fprintf(fp2, "Rd: %s", IDEX->Rd);
+
+	fprintf(fp2, "\n\n");
+
+}
+
+
+
+void print(FILE *fp1, FILE *fp2)
+{
+	int c=1;			//Ciclo actual.
+	struct _instruction *insAct[4];		//Iremos tomando de a cuatro instrucciones.
+	pcUpdate();				//Llenamos los valores del PC para cada instruccion.
+	fprintf(fp2, "Ciclo\t\tIF/ID\t\t\t\t\t\t\t\t\t\tID/EX\t\t\t\tEX/MEM\t\t\t\tMEM/WB\n");
+	
+	struct _instruction *aux; /* lo usamos para recorrer la lista */
+	aux = first;
+	while (aux!=NULL) 
+	{
+		int e=0;
+		while(e<5)
+		{	
+
+
+			if(e==0)		//IF
+			{
+				printf("IF!!!");
+				IFID->Add_PC = aux->pc+4;
+				strcpy(IFID->ins, aux->ins);
+			}
+
+			if(e==1)		//ID
+			{
+
+				
+			}
+
+			if(e==2)		//EX
+			{
+				
+			}
+
+			if(e==3)		//MEM
+			{
+				
+			}
+
+			if(e==4)		//WB
+			{
+				
+			}
+
+
+
+
+
+			e++;
+		}
+		fprintf(fp2, "%i\t\t\t", c);			//Imprimimos el ciclo
+		fprintf(fp2, "%s\n", aux->ins);		//Imprimimos instruccion
+		printBuffers(fp2);					//Imprimimos buffers
+		c++;
+		aux = aux->next;
+	
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void trazaFull(FILE *fp1, FILE *fp2) 						// Imprime los archivos de salida
 	{
 	pcUpdate();				//Llenamos los valores del PC para cada instruccion.
 	fprintf(fp1, "Instrucción\t\t\tETAPA\tPC\t$at\t$v0\t$v1\t$a0\t$a1\t$a2\t$a3\t$t0\t$t1\t$t2\t$t3\t$t4\t$t5\t$t6\t$t7\t$s0\t$s1\t$s2\t$s3\t$s4\t$s5\t$s6\t$s7\t$t8\t$t9\t$k0\t$k1\t$gp\t$sp\t$fp\t$ra\t$zero\n");
-	fprintf(fp2, "Instrucción\t\t\t\t\tRegDst\tJump\tBranch\tMemRead\tMemToReg\tALUOP\tMemWrite\tALUSrc\tRegwrite\n");
+//	fprintf(fp2, "Instrucción\t\t\t\t\tRegDst\tJump\tBranch\tMemRead\tMemToReg\tALUOP\tMemWrite\tALUSrc\tRegwrite\n");
 	
 	struct _instruction *aux; /* lo usamos para recorrer la lista */
 	int i;
@@ -397,8 +675,8 @@ void trazaFull(FILE *fp1, FILE *fp2) 						// Imprime los archivos de salida
 
 			if(i==0) 											//ETAPA IF
 			{
-				fprintf(fp2, "%s", aux->ins);			//Imprimimos instruccion en el segundo archivo, se hace solo en IF ya que en el segundo archivo solo debemos imprimir las instrucciones una sola vez.
-				ctrlCheck(aux, fp2);					//Calculo de las lineas de Control.
+//				fprintf(fp2, "%s", aux->ins);			//Imprimimos instruccion en el segundo archivo, se hace solo en IF ya que en el segundo archivo solo debemos imprimir las instrucciones una sola vez.
+//				ctrlCheck(aux, fp2);					//Calculo de las lineas de Control.
 				
 				fprintf(fp1, "\tIF");
 				
@@ -739,7 +1017,15 @@ int main()
 	char inputFile2[30];		//nombre archivo de entrada	2 (registros)
 	char outputFile1[30];	//nombre archivo de salida 1
 	char outputFile2[30];	//nombre archivo de salida 2
-	
+
+	IFID = (struct _bufferIFID *) malloc (sizeof(struct _bufferIFID));		//Se localiza memoria para los buffers
+	IDEX = (struct _bufferIDEX *) malloc (sizeof(struct _bufferIDEX));
+	EXMEM = (struct _bufferEXMEM *) malloc (sizeof(struct _bufferEXMEM));
+	MEMWB = (struct _bufferMEMWB *) malloc (sizeof(struct _bufferMEMWB));
+
+	flush(IFID, IDEX, EXMEM, MEMWB);				//Flush inicial a los buffers para evitar valores basura.
+
+		
 	printf("Bienvenido, por favor ingrese el nombre del archivo de entrada 1 correspondiente al programa MIPs (incluyendo extensión):\n"); // PANTALLA DE BIENVENIDA E INGRESO DE ARCHIVO DE ENTRADA
 	scanf("%s", inputFile1);
 	
@@ -823,7 +1109,12 @@ int main()
 	fp2 = fopen(outputFile2, "w+");
 	
 	
-	trazaFull(fp1,fp2);					//Se imprimen las trazas de registros y lineas de control en archivo 1 y 2 respectivamente.
+//	trazaFull(fp1,fp2);					//Se imprimen las trazas de registros y lineas de control en archivo 1 y 2 respectivamente.
+
+	print(fp1, fp2);
+	
+	
+	
 	fclose(fp1);						//Se cierran los archivos
 	fclose(fp2);
 
