@@ -71,37 +71,37 @@ struct _bufferMEMWB {
 
 
 long at = 0;
-long v0 = 0;
+long v0 = 15;
 long v1 = 0;
-long a0 = 0;
-long a1 = 0;
+long a0 = 1386;
+long a1 = 3;
 long a2 = 0;
 long a3 = 0;
-long t0 = 0;
-long t1 = 0;
+long t0 = 7;
+long t1 = 2433469440;
 long t2 = 0;
 long t3 = 0;
 long t4 = 0;
 long t5 = 0;
-long t6 = 0;
-long t7 = 0;
-long s0 = 0;
-long s1 = 0;
+long t6 = 4515151;
+long t7 = 3722304989;
+long s0 = 20488191;
+long s1 = 4294901760;
 long s2 = 0;
 long s3 = 0;
-long s4 = 0;
+long s4 = 859762704;
 long s5 = 0;
-long s6 = 0;
-long s7 = 0;
-long t8 = 0;
-long t9 = 0;
+long s6 = 4294901984;
+long s7 = 268435456;
+long t8 = 1080;
+long t9 = 1068040192;
 long k0 = 0;
 long k1 = 0;
-long gp = 0;
-long sp = 0;
+long gp = 268468224;
+long sp = 0; //	long sp = 4096;
 long stack[100];
 long fp = 0;
-long ra = 0;
+long ra = 3000;
 long zero = 0;
 
 struct _instruction *ins[4];
@@ -475,7 +475,7 @@ void flush(struct _bufferIFID *IFID, struct _bufferIDEX *IDEX, struct _bufferEXM
 	strcpy(MEMWB->Mux_RegDst,"");
 }
 
-void printBuffers(FILE *fp2)
+void printBuffers2(FILE *fp2)
 {
 	fprintf(fp2, "\t\t\t");
 	printf("HOLA");
@@ -575,21 +575,107 @@ void printBuffers(FILE *fp2)
 
 }
 
+void printBuffers(FILE *fp2)
+{
+	fprintf(fp2, "----------\n");
+	fprintf(fp2, "IF/ID\n");
+	fprintf(fp2, "%s\n", ins[0]->ins);
+	fprintf(fp2, "Add_PC: %ld", IFID->Add_PC);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Ins: %s", IFID->ins);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "----------\n");
+	fprintf(fp2, "ID/EX\n");
+	fprintf(fp2, "%s\n", ins[1]->ins);
+	fprintf(fp2, "Add_PC: %s", IDEX->Add_PC);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "ALUSrc: %i", IDEX->ALUSrc);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "ALUOP: %i", IDEX->ALUOP);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "RegDst: %i", IDEX->RegDst);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Branch: %i", IDEX->Branch);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Memwrite: %i", IDEX->MemWrite);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "MemRead: %i", IDEX->MemRead);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "RegWrite: %i", IDEX->RegWrite);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Read_data_1: %i", IDEX->Read_data_1);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Read_data_2: %i", IDEX->Read_data_2);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Sign_extend: %i", IDEX->Sign_extend);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Rs: %s", IDEX->Rs);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Rt: %s", IDEX->Rt);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Rd: %s", IDEX->Rd);
+	fprintf(fp2, "\n");
+
+	fprintf(fp2, "----------\n");
+	fprintf(fp2, "EX/MEM\n");
+	fprintf(fp2, "%s\n", ins[2]->ins);
+	fprintf(fp2, "Branch: %i", EXMEM->Branch);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "MemWrite: %i", EXMEM->MemWrite);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "MemRead: %i", EXMEM->MemRead);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "RegWrite: %i", EXMEM->RegWrite);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "MemToReg: %i", EXMEM->MemToReg);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Zero: %i", EXMEM->Zero);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "ALU_Result: %i", EXMEM->ALU_Result);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Read_data_2: %i", EXMEM->Read_data_2);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Add_result: %i", EXMEM->Add_result);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Mux_RegDst: %s", EXMEM->Mux_RegDst);
+	fprintf(fp2, "\n");
+
+
+	fprintf(fp2, "----------\n");
+	fprintf(fp2, "MEM/WB\n");
+	fprintf(fp2, "%s\n", ins[3]->ins);
+	fprintf(fp2, "RegWrite: %i", MEMWB->RegWrite);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "MemToReg: %i", MEMWB->MemToReg);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Read_data: %i", MEMWB->Read_data);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "ALU_Result: %i", MEMWB->ALU_Result);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "Mux_RegDst: %s", MEMWB->Mux_RegDst);
+	fprintf(fp2, "\n");
+	fprintf(fp2, "----------\n");
+
+	fprintf(fp2, "\n\n");
+
+}
+
 void addtoIns(struct _instruction *in)
 {
 
-	if(ins[0]==NULL && ins[1]==NULL && ins[2]==NULL && ins[3]==NULL)
+	if(ins[0]==NULL)	ins[0] = in;
+	if(ins[1]==NULL)	ins[1] = in;
+	if(ins[2]==NULL)	ins[2] = in;
+	if(ins[3]==NULL)	ins[3] = in;
+
+	if(ins[0]!=NULL && ins[1]!=NULL && ins[2]!=NULL && ins[3]!=NULL)
 	{
 		ins[3] = ins[2];
 		ins[2] = ins[1];
 		ins[1] = ins[0];
 		ins[0] = in;
 	}
-
-	if(ins[0]==NULL)	ins[0] = in;
-	if(ins[1]==NULL)	ins[1] = in;
-	if(ins[2]==NULL)	ins[2] = in;
-	if(ins[3]==NULL)	ins[3] = in;
 
 }
 
@@ -600,13 +686,17 @@ void print(FILE *fp1, FILE *fp2)
 	int c=1;			//Ciclo actual.
 	pcUpdate();				//Llenamos los valores del PC para cada instruccion.
 	ins[0]=NULL;	ins[1]=NULL;	ins[2]=NULL;	ins[3]=NULL;
-	fprintf(fp2, "Ciclo\t\tIF/ID\t\t\t\t\t\t\t\t\t\tID/EX\t\t\t\tEX/MEM\t\t\t\tMEM/WB\n");
-	addtoIns(aux);
+//	fprintf(fp2, "Ciclo\t\tInstrucción\n");
 	
 	struct _instruction *aux; /* lo usamos para recorrer la lista */
 	aux = first;
+	int pc=0;
 	while (aux!=NULL) 
 	{
+		aux = searchByPC(pc);
+		if(aux->ins==NULL) break;
+		if(strstr(aux->ins,":")!=NULL)	aux=aux->next;		//saltamos si es un label
+		addtoIns(aux);
 		int e=0;
 		while(e<5)
 		{	
@@ -614,15 +704,19 @@ void print(FILE *fp1, FILE *fp2)
 
 			if(e==0)		//IF
 			{
-				printf("IF!!!");
-				IFID->Add_PC = aux->pc+4;
+			
+			//	IFID->Add_PC = aux->pc+4;
 				strcpy(IFID->ins, aux->ins);
+
 
 			}
 
 			if(e==1)		//ID
 			{
-
+				if(strcmp(aux->op, "j")==0)
+				{
+					pc=searchPCByLabel(aux->r1);
+				}
 				
 			}
 
@@ -638,7 +732,7 @@ void print(FILE *fp1, FILE *fp2)
 
 			if(e==4)		//WB
 			{
-				
+
 			}
 
 
@@ -647,11 +741,13 @@ void print(FILE *fp1, FILE *fp2)
 
 			e++;
 		}
+		fprintf(fp2, "Ciclo\t\tInstrucción\n");
 		fprintf(fp2, "%i\t\t\t", c);			//Imprimimos el ciclo
 		fprintf(fp2, "%s\n", aux->ins);		//Imprimimos instruccion
 		printBuffers(fp2);					//Imprimimos buffers
 		c++;
-		aux = aux->next;
+	//	aux = aux->next;
+		pc=pc+4;
 	
 	}
 }
@@ -697,8 +793,7 @@ void trazaFull(FILE *fp1, FILE *fp2) 						// Imprime los archivos de salida
 
 			if(i==0) 											//ETAPA IF
 			{
-//				fprintf(fp2, "%s", aux->ins);			//Imprimimos instruccion en el segundo archivo, se hace solo en IF ya que en el segundo archivo solo debemos imprimir las instrucciones una sola vez.
-//				ctrlCheck(aux, fp2);					//Calculo de las lineas de Control.
+
 				
 				fprintf(fp1, "\tIF");
 				
