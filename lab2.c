@@ -2,46 +2,8 @@
 #include <string.h>
 #include <stdlib.h> // For exit() function
 
-// Variables globales (Registros)		En el main se actualizarán con los valores del archivo de entrada de Registros.
 
-
-long at = 0;
-long v0 = 0;
-long v1 = 0;
-long a0 = 0;
-long a1 = 0;
-long a2 = 0;
-long a3 = 0;
-long t0 = 0;
-long t1 = 0;
-long t2 = 0;
-long t3 = 0;
-long t4 = 0;
-long t5 = 0;
-long t6 = 0;
-long t7 = 0;
-long s0 = 0;
-long s1 = 0;
-long s2 = 0;
-long s3 = 0;
-long s4 = 0;
-long s5 = 0;
-long s6 = 0;
-long s7 = 0;
-long t8 = 0;
-long t9 = 0;
-long k0 = 0;
-long k1 = 0;
-long gp = 0;
-long sp = 0;
-long stack[100];
-long fp = 0;
-long ra = 0;
-long zero = 0;
-
-
-
-
+// Estructuras de datos (Instruccion y Buffers)
 
 
 struct _instruction {					// Se guardarán las instrucciones del archivo de entrada en una lista.
@@ -54,6 +16,8 @@ struct _instruction {					// Se guardarán las instrucciones del archivo de entr
 	
     struct _instruction *next;
     };
+
+
 		
 struct _bufferIFID {					
 	long Add_PC;
@@ -101,13 +65,52 @@ struct _bufferMEMWB {
     };
 
 
+
+
+// Variables globales (Registros) (array de instrucciones)		En el main se actualizarán con los valores del archivo de entrada de Registros.
+
+
+long at = 0;
+long v0 = 0;
+long v1 = 0;
+long a0 = 0;
+long a1 = 0;
+long a2 = 0;
+long a3 = 0;
+long t0 = 0;
+long t1 = 0;
+long t2 = 0;
+long t3 = 0;
+long t4 = 0;
+long t5 = 0;
+long t6 = 0;
+long t7 = 0;
+long s0 = 0;
+long s1 = 0;
+long s2 = 0;
+long s3 = 0;
+long s4 = 0;
+long s5 = 0;
+long s6 = 0;
+long s7 = 0;
+long t8 = 0;
+long t9 = 0;
+long k0 = 0;
+long k1 = 0;
+long gp = 0;
+long sp = 0;
+long stack[100];
+long fp = 0;
+long ra = 0;
+long zero = 0;
+
+struct _instruction *ins[4];
+
 struct _instruction *first, *last;		// Punteros hacía el primer y último elemento de la lista (primera y última instrucción del archivo de entrada en este caso).
 struct _bufferIFID *IFID;				//Buffers
 struct _bufferIDEX *IDEX;		
 struct _bufferEXMEM *EXMEM;		
 struct _bufferMEMWB *MEMWB;
-
-
 
 
 
@@ -572,14 +575,33 @@ void printBuffers(FILE *fp2)
 
 }
 
+void addtoIns(struct _instruction *in)
+{
+
+	if(ins[0]==NULL && ins[1]==NULL && ins[2]==NULL && ins[3]==NULL)
+	{
+		ins[3] = ins[2];
+		ins[2] = ins[1];
+		ins[1] = ins[0];
+		ins[0] = in;
+	}
+
+	if(ins[0]==NULL)	ins[0] = in;
+	if(ins[1]==NULL)	ins[1] = in;
+	if(ins[2]==NULL)	ins[2] = in;
+	if(ins[3]==NULL)	ins[3] = in;
+
+}
+
 
 
 void print(FILE *fp1, FILE *fp2)
 {
 	int c=1;			//Ciclo actual.
-	struct _instruction *insAct[4];		//Iremos tomando de a cuatro instrucciones.
 	pcUpdate();				//Llenamos los valores del PC para cada instruccion.
+	ins[0]=NULL;	ins[1]=NULL;	ins[2]=NULL;	ins[3]=NULL;
 	fprintf(fp2, "Ciclo\t\tIF/ID\t\t\t\t\t\t\t\t\t\tID/EX\t\t\t\tEX/MEM\t\t\t\tMEM/WB\n");
+	addtoIns(aux);
 	
 	struct _instruction *aux; /* lo usamos para recorrer la lista */
 	aux = first;
@@ -595,6 +617,7 @@ void print(FILE *fp1, FILE *fp2)
 				printf("IF!!!");
 				IFID->Add_PC = aux->pc+4;
 				strcpy(IFID->ins, aux->ins);
+
 			}
 
 			if(e==1)		//ID
@@ -658,7 +681,6 @@ void trazaFull(FILE *fp1, FILE *fp2) 						// Imprime los archivos de salida
 	{
 	pcUpdate();				//Llenamos los valores del PC para cada instruccion.
 	fprintf(fp1, "Instrucción\t\t\tETAPA\tPC\t$at\t$v0\t$v1\t$a0\t$a1\t$a2\t$a3\t$t0\t$t1\t$t2\t$t3\t$t4\t$t5\t$t6\t$t7\t$s0\t$s1\t$s2\t$s3\t$s4\t$s5\t$s6\t$s7\t$t8\t$t9\t$k0\t$k1\t$gp\t$sp\t$fp\t$ra\t$zero\n");
-//	fprintf(fp2, "Instrucción\t\t\t\t\tRegDst\tJump\tBranch\tMemRead\tMemToReg\tALUOP\tMemWrite\tALUSrc\tRegwrite\n");
 	
 	struct _instruction *aux; /* lo usamos para recorrer la lista */
 	int i;
@@ -1117,6 +1139,14 @@ int main()
 	
 	fclose(fp1);						//Se cierran los archivos
 	fclose(fp2);
+
+
+
+//	ins = (struct _instruction *) malloc (4*sizeof(struct _instruction));
+
+//	ins[0].pc=7;
+
+//	printf("....%i...\n", ins[0].pc);
 
 	
 	printSP();
