@@ -30,6 +30,7 @@ struct _bufferIDEX {
 	int ALUOP;
 	int RegDst;
 	int Branch;
+	int Jump;
 	int MemWrite;
 	int MemRead;
 	int RegWrite;
@@ -98,7 +99,7 @@ long t9 = 1068040192;
 long k0 = 0;
 long k1 = 0;
 long gp = 268468224;
-long sp = 0; //	long sp = 4096;
+long sp = 4096; //long sp = 0; 	
 long stack[100];
 long fp = 0;
 long ra = 3000;
@@ -436,43 +437,117 @@ void printSP()
 	}
 }
 
-void flush(struct _bufferIFID *IFID, struct _bufferIDEX *IDEX, struct _bufferEXMEM *EXMEM, struct _bufferMEMWB *MEMWB)
+void ctrlLines()
 {
-	IFID->Add_PC=0;				//Flush de IFID
-	strcpy(IFID->ins,"");
 
-	IDEX->Add_PC=0;				//Flush de IDEX
-	IDEX->ALUSrc=0;
-	IDEX->ALUOP=0;
-	IDEX->RegDst=0;
-	IDEX->Branch=0;
-	IDEX->MemWrite=0;
-	IDEX->MemRead=0;
-	IDEX->RegWrite=0;
-	IDEX->MemToReg=0;
-	IDEX->Read_data_1=0;
-	IDEX->Read_data_2=0;
-	IDEX->Sign_extend=0;
-	strcpy(IDEX->Rs,"");
-	strcpy(IDEX->Rt,"");
-	strcpy(IDEX->Rd,"");
+}
 
-	EXMEM->Branch=0;			//Flush de EXMEM
-	EXMEM->MemWrite=0;
-	EXMEM->MemRead=0;
-	EXMEM->RegWrite=0;
-	EXMEM->MemToReg=0;
-	EXMEM->Zero=0;
-	EXMEM->ALU_Result=0;
-	EXMEM->Read_data_2=0;
-	EXMEM->Add_result=0;
-	strcpy(EXMEM->Mux_RegDst,"");
+void flush(int f)
+{
 
-	MEMWB->RegWrite=0;			//Flush de MEMWB
-	MEMWB->MemToReg=0;
-	MEMWB->Read_data=0;
-	MEMWB->ALU_Result=0;
-	strcpy(MEMWB->Mux_RegDst,"");
+	if(f==0)		//flush a todos los buffers.
+	{
+
+		IFID->Add_PC=0;				//Flush de IFID
+		strcpy(IFID->ins,"");
+
+		IDEX->Add_PC=0;				//Flush de IDEX
+		IDEX->ALUSrc=0;
+		IDEX->ALUOP=0;
+		IDEX->RegDst=0;
+		IDEX->Branch=0;
+		IDEX->Jump=0;
+		IDEX->MemWrite=0;
+		IDEX->MemRead=0;
+		IDEX->RegWrite=0;
+		IDEX->MemToReg=0;
+		IDEX->Read_data_1=0;
+		IDEX->Read_data_2=0;
+		IDEX->Sign_extend=0;
+		strcpy(IDEX->Rs,"");
+		strcpy(IDEX->Rt,"");
+		strcpy(IDEX->Rd,"");
+
+		EXMEM->Branch=0;			//Flush de EXMEM
+		EXMEM->MemWrite=0;
+		EXMEM->MemRead=0;
+		EXMEM->RegWrite=0;
+		EXMEM->MemToReg=0;
+		EXMEM->Zero=0;
+		EXMEM->ALU_Result=0;
+		EXMEM->Read_data_2=0;
+		EXMEM->Add_result=0;
+		strcpy(EXMEM->Mux_RegDst,"");
+
+		MEMWB->RegWrite=0;			//Flush de MEMWB
+		MEMWB->MemToReg=0;
+		MEMWB->Read_data=0;
+		MEMWB->ALU_Result=0;
+		strcpy(MEMWB->Mux_RegDst,"");
+
+		ins[0]=NULL; ins[1]=NULL; ins[2]=NULL; ins[3]=NULL; //Se borran las instrucciones
+	}
+
+	if(f==1)		//flush a IFID
+	{
+		IFID->Add_PC=0;				//Flush de IFID
+		strcpy(IFID->ins,"");
+
+		ins[0]=NULL;		//Se borra la instruccion
+	}
+
+	if(f==2)		//flush solo a IFID e IDEX
+	{
+
+		IDEX->Add_PC=0;				//Flush de IDEX
+		IDEX->ALUSrc=0;
+		IDEX->ALUOP=0;
+		IDEX->RegDst=0;
+		IDEX->Branch=0;
+		IDEX->Jump=0;
+		IDEX->MemWrite=0;
+		IDEX->MemRead=0;
+		IDEX->RegWrite=0;
+		IDEX->MemToReg=0;
+		IDEX->Read_data_1=0;
+		IDEX->Read_data_2=0;
+		IDEX->Sign_extend=0;
+		strcpy(IDEX->Rs,"");
+		strcpy(IDEX->Rt,"");
+		strcpy(IDEX->Rd,"");
+
+		ins[1]=NULL;		//Se borra la instruccion
+	}
+
+	if(f==3)		//flush de EXMEM
+	{
+
+		EXMEM->Branch=0;			//Flush de EXMEM
+		EXMEM->MemWrite=0;
+		EXMEM->MemRead=0;
+		EXMEM->RegWrite=0;
+		EXMEM->MemToReg=0;
+		EXMEM->Zero=0;
+		EXMEM->ALU_Result=0;
+		EXMEM->Read_data_2=0;
+		EXMEM->Add_result=0;
+		strcpy(EXMEM->Mux_RegDst,"");
+
+		ins[2]=NULL;		//Se borra la instruccion
+	}
+
+	if (f==4)		//Flush de MEMWB
+	{
+		MEMWB->RegWrite=0;			//Flush de MEMWB
+		MEMWB->MemToReg=0;
+		MEMWB->Read_data=0;
+		MEMWB->ALU_Result=0;
+		strcpy(MEMWB->Mux_RegDst,"");
+
+		ins[3]=NULL;		//Se borra la instruccion
+	}
+
+	
 }
 
 void printBuffers2(FILE *fp2)
@@ -579,7 +654,8 @@ void printBuffers(FILE *fp2)
 {
 	fprintf(fp2, "----------\n");
 	fprintf(fp2, "IF/ID\n");
-	fprintf(fp2, "%s\n", ins[0]->ins);
+	if(ins[0]!=NULL) fprintf(fp2, "%s\n", ins[0]->ins);
+	if(ins[0]==NULL) fprintf(fp2, "EMPTY\n");
 	fprintf(fp2, "Add_PC: %ld", IFID->Add_PC);
 	fprintf(fp2, "\n");
 	fprintf(fp2, "Ins: %s", IFID->ins);
@@ -587,8 +663,9 @@ void printBuffers(FILE *fp2)
 
 	fprintf(fp2, "----------\n");
 	fprintf(fp2, "ID/EX\n");
-	fprintf(fp2, "%s\n", ins[1]->ins);
-	fprintf(fp2, "Add_PC: %s", IDEX->Add_PC);
+	if(ins[1]!=NULL) fprintf(fp2, "%s\n", ins[1]->ins);
+	if(ins[1]==NULL) fprintf(fp2, "EMPTY\n");
+	fprintf(fp2, "Add_PC: %ld", IDEX->Add_PC);
 	fprintf(fp2, "\n");
 	fprintf(fp2, "ALUSrc: %i", IDEX->ALUSrc);
 	fprintf(fp2, "\n");
@@ -619,7 +696,8 @@ void printBuffers(FILE *fp2)
 
 	fprintf(fp2, "----------\n");
 	fprintf(fp2, "EX/MEM\n");
-	fprintf(fp2, "%s\n", ins[2]->ins);
+	if(ins[2]!=NULL) fprintf(fp2, "%s\n", ins[2]->ins);
+	if(ins[2]==NULL) fprintf(fp2, "EMPTY\n");
 	fprintf(fp2, "Branch: %i", EXMEM->Branch);
 	fprintf(fp2, "\n");
 	fprintf(fp2, "MemWrite: %i", EXMEM->MemWrite);
@@ -644,7 +722,8 @@ void printBuffers(FILE *fp2)
 
 	fprintf(fp2, "----------\n");
 	fprintf(fp2, "MEM/WB\n");
-	fprintf(fp2, "%s\n", ins[3]->ins);
+	if(ins[3]!=NULL) fprintf(fp2, "%s\n", ins[3]->ins);
+	if(ins[3]==NULL) fprintf(fp2, "EMPTY\n");
 	fprintf(fp2, "RegWrite: %i", MEMWB->RegWrite);
 	fprintf(fp2, "\n");
 	fprintf(fp2, "MemToReg: %i", MEMWB->MemToReg);
@@ -664,19 +743,30 @@ void printBuffers(FILE *fp2)
 void addtoIns(struct _instruction *in)
 {
 
-	if(ins[0]==NULL)	ins[0] = in;
-	if(ins[1]==NULL)	ins[1] = in;
-	if(ins[2]==NULL)	ins[2] = in;
-	if(ins[3]==NULL)	ins[3] = in;
-
-	if(ins[0]!=NULL && ins[1]!=NULL && ins[2]!=NULL && ins[3]!=NULL)
+	if(ins[0]==NULL)
 	{
-		ins[3] = ins[2];
-		ins[2] = ins[1];
-		ins[1] = ins[0];
 		ins[0] = in;
 	}
+	if(ins[1]==NULL && ins[0]!=in)
+	{
+		ins[1] = in;
+	}	
+	if(ins[2]==NULL && ins[0]!=in && ins[1]!=in)
+	{
+		ins[2] = in;
+	}	
+	if(ins[3]==NULL && ins[0]!=in && ins[1]!=in && ins[2]!=in)
+	{
+		ins[3] = in;
+	}
+}
 
+void moveIns()
+{
+	ins[3]=ins[2];
+	ins[2]=ins[1];
+	ins[1]=ins[0];
+	ins[0]=NULL;
 }
 
 
@@ -685,71 +775,466 @@ void print(FILE *fp1, FILE *fp2)
 {
 	int c=1;			//Ciclo actual.
 	pcUpdate();				//Llenamos los valores del PC para cada instruccion.
-	ins[0]=NULL;	ins[1]=NULL;	ins[2]=NULL;	ins[3]=NULL;
-//	fprintf(fp2, "Ciclo\t\tInstrucción\n");
+//	ins[0]=NULL;	ins[1]=NULL;	ins[2]=NULL;	ins[3]=NULL;
 	
 	struct _instruction *aux; /* lo usamos para recorrer la lista */
 	aux = first;
 	int pc=0;
 	while (aux!=NULL) 
 	{
+		printf("\nSEARCHBYPC\n");
 		aux = searchByPC(pc);
 		if(aux->ins==NULL) break;
-		if(strstr(aux->ins,":")!=NULL)	aux=aux->next;		//saltamos si es un label
+		if(strstr(aux->ins,":")!=NULL)	aux=aux->next;		//La saltamos si es un label
+		printf("\nADDTOINS\n");
 		addtoIns(aux);
 		int e=0;
 		while(e<5)
 		{	
 
-
-			if(e==0)		//IF
+			printf("\n%i - %s\n", e, ins[0]);
+			if(e==0 && ins[0]!=NULL)		//IF
 			{
 			
-			//	IFID->Add_PC = aux->pc+4;
-				strcpy(IFID->ins, aux->ins);
-
-
+				IFID->Add_PC = ins[0]->pc+4;
+				strcpy(IFID->ins, ins[0]->ins);
+				printf("\nIF TERMINADO\n");
 			}
 
-			if(e==1)		//ID
+			printf("\n%i - %s\n", e, ins[1]);
+
+			if(e==1 && ins[1]!=NULL)		//ID
 			{
-				if(strcmp(aux->op, "j")==0)
+				printf("\nENTRAMOS A ID\n");
+				IDEX->Add_PC = ins[1]->pc+4;
+				//IDEX->Add_PC = IFID->Add_PC;
+
+
+
+
+				if((strcmp(ins[1]->op, "add")==0 || ins[1]->op, "mul")==0)			//ADD y MUL
 				{
-					pc=searchPCByLabel(aux->r1);
+					printf("\nADD en ID!!\n");
+					IDEX->ALUSrc=0;
+					IDEX->ALUOP=10;
+					IDEX->RegDst=1;
+					IDEX->Branch=0;
+					IDEX->Jump=0;
+					IDEX->MemWrite=0;
+					IDEX->MemRead=0;
+					IDEX->RegWrite=1;
+					IDEX->MemToReg=0;
+					IDEX->Read_data_1= getRegValue(ins[1]->r2);
+					IDEX->Read_data_2= getRegValue(ins[1]->r3);
+					IDEX->Sign_extend=0;
+					strcpy(IDEX->Rs, ins[1]->r2);
+					strcpy(IDEX->Rt, ins[1]->r3);
+					strcpy(IDEX->Rd, ins[1]->r1);
+
+				}
+
+				if((strcmp(ins[1]->op, "addi")==0))				//ADDI
+				{
+					printf("\nADDI en ID!!\n");
+					IDEX->ALUSrc=1;
+					IDEX->ALUOP=10;
+					IDEX->RegDst=0;
+					IDEX->Branch=0;
+					IDEX->Jump=0;
+					IDEX->MemWrite=0;
+					IDEX->MemRead=0;
+					IDEX->RegWrite=1;
+					IDEX->MemToReg=0;
+					IDEX->Read_data_1= getRegValue(ins[1]->r1);
+					IDEX->Read_data_2= atoi(ins[1]->r2);
+					IDEX->Sign_extend=1;
+					strcpy(IDEX->Rs, ins[1]->r1);
+					strcpy(IDEX->Rt, ins[1]->r2);
+					strcpy(IDEX->Rd, "");
+
+				}
+
+				if((strcmp(ins[1]->op, "sw")==0))				//SW
+				{
+					IDEX->ALUSrc=1;
+					IDEX->ALUOP=00;
+					IDEX->RegDst=0;
+					IDEX->Branch=0;
+					IDEX->Jump=0;
+					IDEX->MemWrite=1;
+					IDEX->MemRead=0;
+					IDEX->RegWrite=0;
+					IDEX->MemToReg=0;
+					IDEX->Read_data_1= getRegValue(ins[1]->r1);
+					IDEX->Read_data_2= getRegValue(ins[1]->r2);
+					IDEX->Sign_extend=1;
+					strcpy(IDEX->Rs, ins[1]->r1);
+					strcpy(IDEX->Rt, ins[1]->r2);
+					strcpy(IDEX->Rd, "");
+
+				}
+
+				if((strcmp(ins[1]->op, "lw")==0))				//LW
+				{
+					IDEX->ALUSrc=1;
+					IDEX->ALUOP=00;
+					IDEX->RegDst=0;
+					IDEX->Branch=0;
+					IDEX->Jump=0;
+					IDEX->MemWrite=0;
+					IDEX->MemRead=1;
+					IDEX->RegWrite=1;
+					IDEX->MemToReg=1;
+					IDEX->Read_data_1= getRegValue(ins[1]->r1);
+					IDEX->Read_data_2= getRegValue(ins[1]->r2);
+					IDEX->Sign_extend=1;
+					strcpy(IDEX->Rs, ins[1]->r1);
+					strcpy(IDEX->Rt, ins[1]->r2);
+					strcpy(IDEX->Rd, "");
+
+				}
+
+				if((strcmp(ins[1]->op, "beq")==0))				//BEQ
+				{
+					printf("\nBEQ en ID!!\n");
+					IDEX->ALUSrc=0;
+					IDEX->ALUOP=01;
+					IDEX->RegDst=0;
+					IDEX->Branch=1;
+					IDEX->Jump=0;
+					IDEX->MemWrite=0;
+					IDEX->MemRead=0;
+					IDEX->RegWrite=0;
+					IDEX->MemToReg=0;
+					IDEX->Read_data_1= getRegValue(ins[1]->r1);
+					IDEX->Read_data_2= getRegValue(ins[1]->r2);
+					IDEX->Sign_extend=0;
+					strcpy(IDEX->Rs, ins[1]->r1);
+					strcpy(IDEX->Rt, ins[1]->r2);
+					strcpy(IDEX->Rd, "");
+
+				}
+
+				if(strcmp(ins[1]->op, "j")==0)					//J
+				{
+/*					printf("\nJUMP EN ID\n");
+					pc=searchPCByLabel(ins[1]->r1)-4;
+					flush(1); flush(3); flush(4);	//Flush de IFID, EXMEM y MEMEB
+
+					IDEX->ALUSrc=0;
+					IDEX->ALUOP=00;
+					IDEX->RegDst=0;
+					IDEX->Branch=0;
+					IDEX->Jump=1;
+					IDEX->MemWrite=0;
+					IDEX->MemRead=0;
+					IDEX->RegWrite=0;
+					IDEX->MemToReg=0;
+					IDEX->Read_data_1= getRegValue(ins[1]->r2);
+					IDEX->Read_data_2= getRegValue(ins[1]->r3);
+					IDEX->Sign_extend=0;
+					strcpy(IDEX->Rs, ins[1]->r2);
+					strcpy(IDEX->Rt, ins[1]->r3);
+					strcpy(IDEX->Rd, ins[1]->r1);
+*/					
+				}
+
+				if(strcmp(ins[1]->op, "jal")==0)				//JAL
+				{
+				//	pc=searchPCByLabel(ins[1]->r1)-4;
+				//	flush(1); flush(3); flush(4);	//Flush de IFID, EXMEM y MEMEB
+
+/*					IDEX->ALUSrc=0;
+					IDEX->ALUOP=00;
+					IDEX->RegDst=0;
+					IDEX->Branch=0;
+					IDEX->Jump=0;
+					IDEX->MemWrite=0;
+					IDEX->MemRead=0;
+					IDEX->RegWrite=1;
+					IDEX->MemToReg=0;
+					IDEX->Read_data_1= getRegValue(ins[1]->r2);
+					IDEX->Read_data_2= getRegValue(ins[1]->r3);
+					IDEX->Sign_extend=0;
+					strcpy(IDEX->Rs, "");
+					strcpy(IDEX->Rt, "");
+					strcpy(IDEX->Rd, ""); */
+				}
+
+				if(strcmp(ins[1]->op, "jr")==0)				//JR
+				{
+				//	pc=searchPCByLabel(ins[1]->r1)-4;
+					flush(1); flush(3); flush(4);	//Flush de IFID, EXMEM y MEMEB
+
+					IDEX->ALUSrc=0;
+					IDEX->ALUOP=00;
+					IDEX->RegDst=0;
+					IDEX->Branch=0;
+					IDEX->Jump=0;
+					IDEX->MemWrite=0;
+					IDEX->MemRead=0;
+					IDEX->RegWrite=1;
+					IDEX->MemToReg=0;
+					IDEX->Read_data_1= getRegValue(ins[1]->r1);
+					IDEX->Read_data_2= 0;
+					IDEX->Sign_extend=0;
+					strcpy(IDEX->Rs, "");
+					strcpy(IDEX->Rt, "");
+					strcpy(IDEX->Rd, ""); 
+				}
+				
+				printf("HOLA");
+			}
+
+			if(e==2 && ins[2]!=NULL)		//EX
+			{
+/*
+				if(strcmp(ins[2]->op, "add")==0)				//ADD
+				{
+					EXMEM->Branch=0;
+					EXMEM->MemWrite=0;
+					EXMEM->MemRead=0;
+					EXMEM->RegWrite=1;
+					EXMEM->MemToReg=0;
+					EXMEM->Zero=0;
+					EXMEM->ALU_Result=getRegValue(ins[2]->r2)+getRegValue(ins[2]->r3);
+					EXMEM->Read_data_2=getRegValue(ins[2]->r3);
+					EXMEM->Add_result=0;
+					strcpy(EXMEM->Mux_RegDst, ins[2]->r1);
+
+
+
+				}
+
+				if(strcmp(ins[2]->op, "addi")==0)				//ADDI
+				{
+					EXMEM->Branch=0;
+					EXMEM->MemWrite=0;
+					EXMEM->MemRead=0;
+					EXMEM->RegWrite=1;
+					EXMEM->MemToReg=0;
+					EXMEM->Zero=0;
+					EXMEM->ALU_Result=getRegValue(ins[2]->r2)+atoi(ins[2]->r3);
+					EXMEM->Read_data_2=0;
+					EXMEM->Add_result=0;
+					strcpy(EXMEM->Mux_RegDst, ins[2]->r1);
+					
+				}
+
+				if(strcmp(ins[2]->op, "mul")==0)				//MUL
+				{
+					EXMEM->Branch=0;
+					EXMEM->MemWrite=0;
+					EXMEM->MemRead=0;
+					EXMEM->RegWrite=1;
+					EXMEM->MemToReg=0;
+					EXMEM->Zero=0;
+					EXMEM->ALU_Result=getRegValue(ins[2]->r2)*getRegValue(ins[2]->r3);
+					EXMEM->Read_data_2=getRegValue(ins[2]->r3);
+					EXMEM->Add_result=0;
+					strcpy(EXMEM->Mux_RegDst, ins[2]->r1);
+				}
+
+				if(strcmp(ins[2]->op, "sw")==0)				//SW
+				{
+					EXMEM->Branch=0;
+					EXMEM->MemWrite=1;
+					EXMEM->MemRead=0;
+					EXMEM->RegWrite=0;
+					EXMEM->MemToReg=0;
+					EXMEM->Zero=0;
+					EXMEM->ALU_Result=0;
+					EXMEM->Read_data_2=getRegValue(ins[2]->r1);
+					EXMEM->Add_result=0;
+					strcpy(EXMEM->Mux_RegDst, "");
+				}
+
+				if(strcmp(ins[2]->op, "lw")==0)				//LW
+				{
+					EXMEM->Branch=
+					EXMEM->MemWrite=
+					EXMEM->MemRead=
+					EXMEM->RegWrite=
+					EXMEM->MemToReg=
+					EXMEM->Zero=
+					EXMEM->ALU_Result=
+					EXMEM->Read_data_2=
+					EXMEM->Add_result=
+					EXMEM->Mux_RegDst=
+				}
+
+				if(strcmp(ins[2]->op, "beq")==0)				//BEQ
+				{
+					EXMEM->Branch=
+					EXMEM->MemWrite=
+					EXMEM->MemRead=
+					EXMEM->RegWrite=
+					EXMEM->MemToReg=
+					EXMEM->Zero=
+					EXMEM->ALU_Result=
+					EXMEM->Read_data_2=
+					EXMEM->Add_result=
+					EXMEM->Mux_RegDst=
+				}
+
+				if(strcmp(ins[2]->op, "j")==0)				//J
+				{
+					EXMEM->Branch=
+					EXMEM->MemWrite=
+					EXMEM->MemRead=
+					EXMEM->RegWrite=
+					EXMEM->MemToReg=
+					EXMEM->Zero=
+					EXMEM->ALU_Result=
+					EXMEM->Read_data_2=
+					EXMEM->Add_result=
+					EXMEM->Mux_RegDst=
+				}
+
+				if(strcmp(ins[2]->op, "jal")==0)				//JAL
+				{
+					EXMEM->Branch=
+					EXMEM->MemWrite=
+					EXMEM->MemRead=
+					EXMEM->RegWrite=
+					EXMEM->MemToReg=
+					EXMEM->Zero=
+					EXMEM->ALU_Result=
+					EXMEM->Read_data_2=
+					EXMEM->Add_result=
+					EXMEM->Mux_RegDst=
+				}
+
+				if(strcmp(ins[2]->op, "jr")==0)				//JR
+				{
+					EXMEM->Branch=
+					EXMEM->MemWrite=
+					EXMEM->MemRead=
+					EXMEM->RegWrite=
+					EXMEM->MemToReg=
+					EXMEM->Zero=
+					EXMEM->ALU_Result=
+					EXMEM->Read_data_2=
+					EXMEM->Add_result=
+					EXMEM->Mux_RegDst=
+				}
+*/
+				
+			}
+
+			if(e==3 && ins[3]!=NULL)		//MEM
+			{
+
+				if(strcmp(ins[1]->op, "add")==0)				//ADD
+				{
+
+				}
+
+				if(strcmp(ins[1]->op, "addi")==0)				//ADDI
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "mul")==0)				//MUL
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "sw")==0)				//SW
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "lw")==0)				//LW
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "beq")==0)				//BEQ
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "j")==0)				//J
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "jal")==0)				//JAL
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "jr")==0)				//JR
+				{
+					
 				}
 				
 			}
 
-			if(e==2)		//EX
+			if(e==4 && ins[4]!=NULL)		//WB
 			{
-				
+				if(strcmp(ins[1]->op, "add")==0)				//ADD
+				{
+
+				}
+
+				if(strcmp(ins[1]->op, "addi")==0)				//ADDI
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "mul")==0)				//MUL
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "sw")==0)				//SW
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "lw")==0)				//LW
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "beq")==0)				//BEQ
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "j")==0)				//J
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "jal")==0)				//JAL
+				{
+					
+				}
+
+				if(strcmp(ins[1]->op, "jr")==0)				//JR
+				{
+					
+				}
 			}
-
-			if(e==3)		//MEM
-			{
-				
-			}
-
-			if(e==4)		//WB
-			{
-
-			}
-
-
-
-
 
 			e++;
+			printf("\nETAPA TERMINADA\n");
 		}
 		fprintf(fp2, "Ciclo\t\tInstrucción\n");
 		fprintf(fp2, "%i\t\t\t", c);			//Imprimimos el ciclo
 		fprintf(fp2, "%s\n", aux->ins);		//Imprimimos instruccion
 		printBuffers(fp2);					//Imprimimos buffers
+		moveIns();
 		c++;
-	//	aux = aux->next;
 		pc=pc+4;
+	//	aux = aux->next;
+		
 	
 	}
+	pc=pc+4;
 }
 
 
@@ -1140,7 +1625,7 @@ int main()
 	EXMEM = (struct _bufferEXMEM *) malloc (sizeof(struct _bufferEXMEM));
 	MEMWB = (struct _bufferMEMWB *) malloc (sizeof(struct _bufferMEMWB));
 
-	flush(IFID, IDEX, EXMEM, MEMWB);				//Flush inicial a los buffers para evitar valores basura.
+	flush(0);				//Flush inicial a los buffers para evitar valores basura.
 
 		
 	printf("Bienvenido, por favor ingrese el nombre del archivo de entrada 1 correspondiente al programa MIPs (incluyendo extensión):\n"); // PANTALLA DE BIENVENIDA E INGRESO DE ARCHIVO DE ENTRADA
@@ -1194,11 +1679,6 @@ int main()
 		}
 	}
 	
-	printf("HOLA\n");
-	printf(".%i.\n", fptr1);
-	printf(".%i.\n", fptr2);
-	printf(".%i.\n", fptr3);
-	
 	while(!feof(fptr2))				//Se lee el archivo de entrada 2 y ...
 	{
 		
@@ -1210,6 +1690,7 @@ int main()
 		token = strtok(NULL, "\n");
 		printf("%s.\n", token);
 	}
+
 
 	
 	fclose(fptr1);				//Se cierra archivo de entrada
@@ -1227,8 +1708,9 @@ int main()
 	
 	
 //	trazaFull(fp1,fp2);					//Se imprimen las trazas de registros y lineas de control en archivo 1 y 2 respectivamente.
-
+	printf("\nHOLA\n");
 	print(fp1, fp2);
+	printf("\nHOLA\n");
 	
 	
 	
@@ -1245,5 +1727,7 @@ int main()
 
 	
 	printSP();
+//	printf("\nVALOR DE T0: %i\n", getRegValue("16(t0)"));
+//	printf("\nhola: %i\n", strtok("(", "4($t5)"));
     return 0;
 }
